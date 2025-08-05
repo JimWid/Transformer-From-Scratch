@@ -3,7 +3,7 @@
 A full implementation and creation of a Transformer architecture built from scratch, from the reasearch paper "Attention Is All You Need".
 Used to train a Sentiment Classifier on Amazon/IMDb/Yelp reviews dataset.
 
-# Higlights
+# Highlights
 Fully custom Transformer Encoder and Decoder implementation in PyTorch.
 - Trained a sentiment classifier (positive/negative) using only the Transformer **encoder**.
 - Custom tokenizer built from scratch with padding, batching, and vocabulary creation.
