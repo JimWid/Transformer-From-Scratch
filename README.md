@@ -9,7 +9,7 @@ Fully custom Transformer Encoder and Decoder implementation in PyTorch.
 - Custom tokenizer built from scratch with padding, batching, and vocabulary creation.
 - Implements early stopping and model checkpointing for optimal performance.
 - Final model achieves **~90% training accuracy** and **~80% validation accuracy**.
-- Manually tested inference correctly classifies 5 out of 6 unseen inputs.
+- Manually tested inference correctly classifies 5 out of 6 unseen inputs most tries.
 
 # Usage
 ```bash
