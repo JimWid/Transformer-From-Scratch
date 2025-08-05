@@ -30,7 +30,7 @@ python train.py
 python trying_model.py
 ```
 
-# Purpuse
+# The Purpose
 The whole purpuse of this project was to simply have a deep understanding of what happens under the hood in NLP models such as chatGPT.
 It serves me personally as an educational AI project to showcase the ability to build and implement research papers models.
 
