@@ -41,7 +41,8 @@ transformer.py
   - Splits Q, K, V into num_heads subspaces for parallel attention (multi-head).
   - Recombines the heads and applies a final linear projection.
   - Function:
-    ![Function]()
+  
+    <img width="365" height="54" alt="Screenshot 2025-08-04 224157" src="https://github.com/user-attachments/assets/e880be13-167c-43aa-b015-96abaac3301b" />
  
 - **FeedForward**: A position-wise feedforward neural network (FFN) applied after attention, is used to transform token representations.
   - Architecture:
@@ -79,7 +80,9 @@ sentiment_classifier.py
 - Classification head: Linear -> ReLU -> Dropout -> Linear.
 
 Hyperparametes:
-![Hyperparameters]()
+
+<img width="264" height="179" alt="Screenshot 2025-08-04 225758" src="https://github.com/user-attachments/assets/124b7638-9662-4111-86ae-c638bd782b52" />
+
 # File Structure
 ```bash
 ├── train.py                # Training loop with early stopping
@@ -95,9 +98,21 @@ Hyperparametes:
 
 # Results
 #### Epoch 20 Final Results:
-![Results]()
-#### Evaluation with My sentences:
-![Evaluation]()
+
+<img width="613" height="119" alt="Screenshot 2025-08-04 195630" src="https://github.com/user-attachments/assets/8f1bd392-4329-46cf-861a-e61a86c58aa9" />
+
+#### Evaluation with my sentences:
+
+<img width="445" height="277" alt="Screenshot 2025-08-04 195703" src="https://github.com/user-attachments/assets/46fcd243-843b-402d-9583-1d8a225c4c7d" />
+
+#### Metrics:
+<img width="1169" height="491" alt="Screenshot 2025-08-04 230220" src="https://github.com/user-attachments/assets/7fa1af3a-9ec3-41c9-8328-0e3b4bff37b5" />
+
+#### Validation Confusion Matrix:
+<img width="617" height="475" alt="image" src="https://github.com/user-attachments/assets/740bd791-f046-4d16-adaf-5c6af9000631" />
+
+
+
 
 
 
