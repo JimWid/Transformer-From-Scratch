@@ -1,25 +1,25 @@
-from transformer import Encoder
+from transformer.encoder import Encoder
 import torch.nn as nn
 
 class SentimentClassifier(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_layers, num_heads, ff_dim, max_len, num_classes, dropout=0.1):
+    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, num_classes, dropout=0.1):
         super().__init__()
         
         self.encoder = Encoder(
             vocab_size=vocab_size,
-            embed_dim=embed_dim,
+            embedding_size=embedding_dim,
             num_layers=num_layers,
             num_heads=num_heads,
-            ff_dim=ff_dim,
+            d_ff=d_ff,
             max_len=max_len,
             dropout=dropout
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim),
+            nn.Linear(embedding_dim, embedding_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(embed_dim, num_classes)
+            nn.Linear(embedding_dim, num_classes)
         )
 
     def forward(self, x, src_mask=None):

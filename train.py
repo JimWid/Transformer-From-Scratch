@@ -75,20 +75,20 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 #-------------------Loading Model-------------------------
 vocab_size = 10_000
-embed_dim = 512
+embedding_dim = 512
 num_layers = 3
 num_heads = 4
-ff_dim = 2048
+d_ff = 2048
 max_len = MAX_LEN
 num_classes = 2  # positive vs negative
 dropout = 0.3
 
 model = SentimentClassifier(
     vocab_size=vocab_size,
-    embed_dim=embed_dim,
+    embedding_dim=embedding_dim,
     num_layers=num_layers,
     num_heads=num_heads,
-    ff_dim=ff_dim,
+    d_ff=d_ff,
     max_len=max_len,
     num_classes=num_classes,
     dropout=dropout).to(device)
