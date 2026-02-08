@@ -44,8 +44,8 @@
 
 import torch
 import torch.nn as nn
-from encoder import Encoder
-from decoder import Decoder
+from transformer.encoder import Encoder
+from transformer.decoder import Decoder
 
 class Transformer(nn.Module):
     def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_size, num_layers, d_ff, num_heads, dropout, max_len, device):

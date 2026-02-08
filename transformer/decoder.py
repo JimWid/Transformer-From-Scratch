@@ -43,8 +43,8 @@
 
 import torch
 import torch.nn as nn
-from multi_head_attention import MultiHeadAttention
-from feed_foward import FeedForward
+from transformer.multi_head_attention import MultiHeadAttention
+from transformer.feed_foward import FeedForward
 
 class DecoderBlock(nn.Module):
     def __init__(self, embedding_size, num_heads, d_ff, dropout):
@@ -70,8 +70,8 @@ class DecoderBlock(nn.Module):
         x = self.norm1(x + self.dropout(_x))
 
         # Cross-Attention
-        _x = self.cross_attention(x, enc_out, enc_out, src_mask)
-        x = self.norm2(x + self.dropout(_x))
+        #_x = self.cross_attention(x, enc_out, enc_out, src_mask)
+        #x = self.norm2(x + self.dropout(_x))
 
         # Feed Forward
         _x = self.feed_forward(x)
@@ -91,10 +91,17 @@ class Decoder(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.device = device
 
-    def forward(self, x, enc_out, src_mask=None, trg_mask=None):
+    def make_causal_mask(self, seq_len):
+        
+        mask = torch.tril(torch.ones(seq_len, seq_len, device=self.device)).bool().unsqueeze(0).unsqueeze(1)
+        return mask
+
+    def forward(self, x):
 
         # x: [batch_size, target_seq_len]
         N, seq_len = x.shape
+        mask = self.make_causal_mask(seq_len)
+
         position = torch.arange(0, seq_len, device=self.device).unsqueeze(0).expand(N, seq_len)
 
         # x: [batch_size, target_seq_len, embedding_size]
@@ -102,7 +109,7 @@ class Decoder(nn.Module):
 
         # Pass through each DecoderBlock
         for layer in self.layers:
-            x = layer(x, enc_out, src_mask=src_mask, trg_mask=trg_mask)
+            x = layer(x, None, None, mask)
 
         output = self.fc_out(x)
         return output
