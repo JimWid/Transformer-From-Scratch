@@ -40,7 +40,6 @@
     Output: [batch_size, target_sequence_length, vocab_size]
 """
 
-
 import torch
 import torch.nn as nn
 from transformer.multi_head_attention import MultiHeadAttention
@@ -87,20 +86,18 @@ class Decoder(nn.Module):
         self.layers = nn.ModuleList(
             [DecoderBlock(embedding_size, num_heads, d_ff, dropout) for _ in range(num_layers)]
         )
-        self.fc_out = nn.Linear(embedding_size, vocab_size)
+
         self.dropout = nn.Dropout(dropout)
         self.device = device
-
-    def make_causal_mask(self, seq_len):
-        
-        mask = torch.tril(torch.ones(seq_len, seq_len, device=self.device)).bool().unsqueeze(0).unsqueeze(1)
-        return mask
+        self.register_buffer("trg_mask", torch.tril(
+            torch.ones(max_len, max_len, device=self.device)
+            ).bool())
 
     def forward(self, x):
 
         # x: [batch_size, target_seq_len]
         N, seq_len = x.shape
-        mask = self.make_causal_mask(seq_len)
+        mask = self.trg_mask[:seq_len, :seq_len]
 
         position = torch.arange(0, seq_len, device=self.device).unsqueeze(0).expand(N, seq_len)
 
@@ -111,5 +108,4 @@ class Decoder(nn.Module):
         for layer in self.layers:
             x = layer(x, None, None, mask)
 
-        output = self.fc_out(x)
-        return output
+        return x

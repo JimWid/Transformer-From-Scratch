@@ -18,10 +18,8 @@ class TextGenerator(nn.Module):
 
         self.generator = nn.Linear(embedding_dim, vocab_size)
 
-
-    def forward(self, x, trg_mask=None):
+    def forward(self, x):
         # x: [batch_size, seq_len]
-
-        decoded = self.decoder(x, src_mask=None, trg_mask=trg_mask)
+        decoded = self.decoder(x)
         logits = self.generator(decoded)
         return logits
