@@ -28,7 +28,7 @@ class Tokenizer:
     
     def tokenize(self, text):
         text = text.lower()
-        return re.findall(r"\b\w+\b", text) # Seperates words from sentences, and also removes punctuation
+        return re.findall(r"\w+|[^\w\s]", text) # Seperates words from sentences, and also removes punctuation
 
     def transform(self, text): # Use this for single text
         if isinstance(text, str):
