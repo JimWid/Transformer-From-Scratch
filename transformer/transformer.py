@@ -48,11 +48,11 @@ from transformer.encoder import Encoder
 from transformer.decoder import Decoder
 
 class Transformer(nn.Module):
-    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_size, num_layers, d_ff, num_heads, dropout, max_len, device):
+    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_dim, num_layers, d_ff, num_heads, dropout, max_len, device):
         super(Transformer, self).__init__()
 
-        self.encoder = Encoder(vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, device, dropout)
-        self.decoder = Decoder(vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, device, dropout)
+        self.encoder = Encoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len,dropout, device)
+        self.decoder = Decoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, device, dropout)
         self.src_pad_idx = src_pad_idx
         self.trg_pad_idx = trg_pad_idx
         self.device = device
