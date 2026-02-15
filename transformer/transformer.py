@@ -48,11 +48,11 @@ from transformer.encoder import Encoder
 from transformer.decoder import Decoder
 
 class Transformer(nn.Module):
-    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_dim, num_layers, d_ff, num_heads, dropout, max_len, device):
+    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_dim, num_layers, d_ff, num_heads, max_len, dropout, device):
         super(Transformer, self).__init__()
 
         self.encoder = Encoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len,dropout, device)
-        self.decoder = Decoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, device, dropout)
+        self.decoder = Decoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, dropout, device)
         self.src_pad_idx = src_pad_idx
         self.trg_pad_idx = trg_pad_idx
         self.device = device
@@ -61,21 +61,10 @@ class Transformer(nn.Module):
         src_mask = (src != self.src_pad_idx).unsqueeze(1).unsqueeze(2)
         return src_mask.to(self.device)
     
-    def make_trg_mask(self, trg):
-        N, trg_len = trg.shape
-
-        pad_mask = (trg != self.trg_pad_idx).unsqueeze(1).unsqueeze(2)
-        causal_mask = torch.tril(torch.ones((trg_len, trg_len), device=self.device)).bool()
-        causal_mask = causal_mask.unsqueeze(0).unsqueeze(1)
-
-        trg_mask = pad_mask & causal_mask
-        return trg_mask
-    
     def forward(self, src, trg):
         src_mask = self.make_src_mask(src)
-        trg_mask = self.make_trg_mask(trg)
 
-        enc_src = self.encoder(src, src_mask)
+        enc_out = self.encoder(src, src_mask)
 
-        output = self.decoder(trg, enc_src, src_mask=src_mask, trg_mask=trg_mask)
+        output = self.decoder(trg, enc_out, src_mask)
         return output

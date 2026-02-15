@@ -64,7 +64,7 @@ class EncoderBlock(nn.Module):
         return output
 
 class Encoder(nn.Module):
-    def __init__(self, vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, dropout, device="cuda"):
+    def __init__(self, vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, dropout, device):
         super(Encoder, self).__init__()
 
         self.embedding = Embedding(vocab_size, embedding_size)

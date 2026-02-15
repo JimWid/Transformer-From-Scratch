@@ -11,8 +11,8 @@ class Tokenizer:
     def __init__(self, vocab_size=10000, min_freq=1):
         self.vocab_size = vocab_size
         self.min_freq = min_freq
-        self.word_to_idx = {"<PAD>": 0, "<UNK>": 1} # PAD = Padding is to fill the gaps in short sentences
-        self.idx_to_word = {0: "<PAD>", 1: "<UNK>"} # UNK = Unkown, for words that were not in the training phase
+        self.word_to_idx = {"<PAD>": 0, "<UNK>": 1, "<SOS>": 2, "<EOS>": 3} # PAD = Padding is to fill the gaps in short sentences
+        self.idx_to_word = {0: "<PAD>", 1: "<UNK>", 2: "<SOS>", 3: "<EOS>"} # UNK = Unkown, for words that were not in the training phase
     
     def fit(self, texts):
         word_counts = Counter()
@@ -20,8 +20,8 @@ class Tokenizer:
             tokens = self.tokenize(text)
             word_counts.update(tokens)
 
-        most_common = word_counts.most_common(self.vocab_size - 2) # Reverse space, taking out 0 and 1
-        for idx, (word, count) in enumerate(most_common, start=2): # Starting from 2 
+        most_common = word_counts.most_common(self.vocab_size - 4) # Reverse space, taking out 0, 1, 2 and 3
+        for idx, (word, count) in enumerate(most_common, start=4): # Starting from 4 
             if count >= self.min_freq:
                 self.word_to_idx[word] = idx
                 self.idx_to_word[idx] = word 

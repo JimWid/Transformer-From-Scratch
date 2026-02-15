@@ -62,15 +62,16 @@ class DecoderBlock(nn.Module):
         # Dropout
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, enc_out, src_mask=None, trg_mask=None):
+    def forward(self, x, enc_out=None, src_mask=None, trg_mask=None):
 
         # Masked Multi-Head Attention
         _x = self.masked_attention(x, x, x, trg_mask)
         x = self.norm1(x + self.dropout(_x))
 
         # Cross-Attention
-        #_x = self.cross_attention(x, enc_out, enc_out, src_mask)
-        #x = self.norm2(x + self.dropout(_x))
+        if enc_out != None:
+            _x = self.cross_attention(x, enc_out, enc_out, src_mask)
+            x = self.norm2(x + self.dropout(_x))
 
         # Feed Forward
         _x = self.feed_forward(x)
@@ -78,22 +79,29 @@ class DecoderBlock(nn.Module):
         return output
 
 class Decoder(nn.Module):
-    def __init__(self, vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, device, dropout):
+    def __init__(self, vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, dropout, device):
         super(Decoder, self).__init__()
 
+        self.device = device
+        
         self.word_embedding = nn.Embedding(vocab_size, embedding_size)
         self.position_embedding = nn.Embedding(max_len, embedding_size)
         self.layers = nn.ModuleList(
             [DecoderBlock(embedding_size, num_heads, d_ff, dropout) for _ in range(num_layers)]
         )
 
+        # Dropout
         self.dropout = nn.Dropout(dropout)
-        self.device = device
+
+        # Causal Mask
         self.register_buffer("trg_mask", torch.tril(
             torch.ones(max_len, max_len, device=self.device)
             ).bool())
+        
+        # Final Linear Projection
+        self.fc_out = nn.Linear(embedding_size, vocab_size)
 
-    def forward(self, x):
+    def forward(self, x, enc_out=None, src_mask=None):
 
         # x: [batch_size, target_seq_len]
         N, seq_len = x.shape
@@ -106,6 +114,8 @@ class Decoder(nn.Module):
 
         # Pass through each DecoderBlock
         for layer in self.layers:
-            x = layer(x, None, None, mask)
+            x = layer(x, enc_out, src_mask, mask)
 
-        return x
+        logits = self.fc_out(x)
+
+        return logits
