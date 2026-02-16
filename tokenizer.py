@@ -41,13 +41,10 @@ class Tokenizer:
         return [self.transform(t) for t in texts]
 
     def pad_sequence(self, sequence, max_len):
-        padded = []
-        for seq in sequence:
-            if len(seq) < max_len:
+            if len(sequence) < max_len:
                 # Pad with 0s (the index of <PAD>)
-                seq = seq + [self.word_to_idx["<PAD>"]] * (max_len - len(seq))
+                sequence = sequence + [self.word_to_idx["<PAD>"]] * (max_len - len(sequence))
             else:
                 # Truncate if too long
-                seq = seq[:max_len]
-            padded.append(seq)
-        return padded
+                sequence = sequence[:max_len]
+            return sequence
