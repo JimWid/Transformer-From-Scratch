@@ -3,9 +3,11 @@ venv
 __pycache__/
 
 models/*
-!models/.gitkeep
-
 data/*
+
+!models/.gitkeep
 !data/.gitkeep
 
-
+*.pt
+*.pth
+*.pkl
