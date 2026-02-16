@@ -2,7 +2,7 @@ from transformer.encoder import Encoder
 import torch.nn as nn
 
 class SentimentClassifier(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, num_classes, dropout=0.1):
+    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, num_classes, dropout, device):
         super().__init__()
         
         self.encoder = Encoder(
@@ -12,7 +12,8 @@ class SentimentClassifier(nn.Module):
             num_heads=num_heads,
             d_ff=d_ff,
             max_len=max_len,
-            dropout=dropout
+            dropout=dropout,
+            device=device
         )
 
         self.classifier = nn.Sequential(
