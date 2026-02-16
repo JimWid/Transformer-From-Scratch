@@ -32,11 +32,13 @@ Transformer_from_Scratch/
 └── README.md
 ```
 # Index
-1. Tokenizer
-2. Transformer Architecture
-3. Sentiment Classification (Encoder-only)
-4. Text Generation (Decoder-only)
-5. Translation (Encoder-Decoder)
+1. [Tokenizer](#tokenizer)
+2. [Transformer Architecture](#transformer-architecture)
+3. [Sentiment Classification](#sentiment-classification) (Encoder-only)
+4. [Text Generation](#text-generation) (Decoder-only)
+5. [Translation](#translation) (Encoder-Decoder)
+6. [References & Citations](#reference-&-citations)
+7. [License](#license)
 #### Clone Repo
 ```bash
 git clone https://github.com/JimWid/Transformer-From-Scratch.git
@@ -393,14 +395,141 @@ class Transformer(nn.Module):
 ```
 # Sentiment Classification
 Once we have our Encoder, we can assign it to do Classification. We do not need the Decoder, since we are not doing anything sequence-to-sequence operation, simply attention.
+#### Sentiment Classifier Code:
+``` python
+class SentimentClassifier(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, num_classes, dropout, device):
+        super().__init__()
+        
+        self.encoder = Encoder(
+            vocab_size=vocab_size,
+            embedding_size=embedding_dim,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            d_ff=d_ff,
+            max_len=max_len,
+            dropout=dropout,
+            device=device
+        )
+
+        self.classifier = nn.Sequential(
+            nn.Linear(embedding_dim, embedding_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(embedding_dim, num_classes)
+        )
+
+    def forward(self, x, src_mask=None):
+        # x: [batch_size, seq_len]
+        x = self.encoder(x, src_mask) # [batch_size, seq_len, embed_dim]
+
+        # Mean pooling of the sequence_length (dim=1)
+        x = x.mean(dim=1)
+        #x = nn.AdaptiveAvgPool1d(1)
+
+        logits = self.classifier(x)
+        return logits
+```
+#### Training Details:
+- Optimizer: Adam
+- Learning rate: 2e-4
+- Loss Function: CrossEntropyLoss
+- Epochs: 20
+- Datasets: Amazon, IMDB, Yelp
+#### Model Specifications:
+- Total Parameters: 11.8 M
+- Model Size: ~45MB
+#### Configuration:
+```python
+model = SentimentClassifier(
+    vocab_size=vocab_size, (4562)
+    embedding_dim=512,
+    num_layers=3,
+    num_heads=4,
+    d_ff=2048,
+    max_len=MAX_LEN, (87)
+    num_classes=2,
+    dropout=0.3,
+    device=device).to(device)
+```
+#### Final Metrics
 
 # Text Generation
+With the Decoder we can do Text Generation, and this is actually what most LLM models are, Decoder-only model. We need thought to create a custom dataset class, that will make the data sutiable for our model. 
+#### TextDataset
+```python
+class TextDataset(Dataset):
+    def __init__(self, tokens, seq_len):
+        self.tokens = tokens
+        self.seq_len = seq_len
+        self.stride = seq_len // 2
+
+    def __len__(self):
+        return (len(self.tokens) - self.seq_len) // self.stride
+    
+    def __getitem__(self, idx):
+
+        start = idx * self.stride
+
+        x = self.tokens[start:start + self.seq_len]
+        y = self.tokens[start + 1:start + self.seq_len + 1]
+       
+        return torch.tensor(x), torch.tensor(y)
+```
+> Here we are basically introducing ```stride```, which will determine how much we slide through tokens, in this case I am sliding/overlapping by half of the length of the sentence, this is good for better data usage!
+
+#### Text Generator Code:
+```python
+class TextGenerator(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, device, max_len, dropout=0.1):
+        super().__init__()
+        
+        self.decoder = Decoder(
+            vocab_size=vocab_size,
+            embedding_size=embedding_dim,
+            num_layers=num_layers,
+            num_heads=num_heads,
+            d_ff=d_ff,
+            device=device,
+            max_len=max_len,
+            dropout=dropout
+        )
+
+        self.generator = nn.Linear(embedding_dim, vocab_size)
+
+    def forward(self, x):
+        # x: [batch_size, seq_len]
+        decoded = self.decoder(x)
+        # logits = self.generator(decoded)
+        return decoded
+```
+#### Training Details:
+- Optimizer: Adam
+- Learning rate: 3e-4
+- Loss Function: CrossEntropyLoss
+- Epochs: 120
+- Dataset: Personal Data
+#### Model Specifications:
+- Total Parameters: 2.76 M
+- Model Size: ~11MB
+#### Configuration:
+```python
+model = TextGenerator(
+    vocab_size=vocab_size, (3,818)
+    embedding_dim=128,
+    num_layers=3,
+    num_heads=4,
+    d_ff=2048,
+    max_len=128,
+    dropout=0.1,
+    device=device).to(device)
+```
+#### Final Metrics
 
 # Translation
 
 # License
 
-
-
+# References & Citations
 
 
