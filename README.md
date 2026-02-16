@@ -8,9 +8,9 @@ This repo contains a **full implementation** of the famous **Transformer archite
 ```
 Transformer_from_Scratch/
 │
-├── data/                    # Data used for each model
+├── data/                    # Use folder for any data you want to try the code with!
 │
-├── models/                  # Saved models (each model have its corresponding Tokenizer and Best Model)  
+├── models/                  # Save the models (tokenizer.pkl and best_model.pt) here!
 │
 ├── notebooks/               # Each notebook contains training phase + trying the saved model
 │   ├── classification_train.ipynb       
