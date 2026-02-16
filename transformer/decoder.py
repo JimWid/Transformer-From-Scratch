@@ -69,7 +69,7 @@ class DecoderBlock(nn.Module):
         x = self.norm1(x + self.dropout(_x))
 
         # Cross-Attention
-        if enc_out != None:
+        if enc_out is not None:
             _x = self.cross_attention(x, enc_out, enc_out, src_mask)
             x = self.norm2(x + self.dropout(_x))
 
@@ -117,6 +117,6 @@ class Decoder(nn.Module):
         for layer in self.layers:
             x = layer(x, enc_out, src_mask, mask)
 
-        logits = self.fc_out(x)
+        # logits = self.fc_out(x)
 
-        return logits
+        return x
