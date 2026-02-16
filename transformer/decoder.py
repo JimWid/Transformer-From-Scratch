@@ -106,6 +106,7 @@ class Decoder(nn.Module):
         # x: [batch_size, target_seq_len]
         N, seq_len = x.shape
         mask = self.trg_mask[:seq_len, :seq_len]
+        mask = mask.unsqueeze(0).unsqueeze(1)
 
         position = torch.arange(0, seq_len, device=self.device).unsqueeze(0).expand(N, seq_len)
 

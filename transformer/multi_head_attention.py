@@ -29,8 +29,6 @@ class MultiHeadAttention(nn.Module):
     def __init__(self, embedding_size, num_heads):
         super(MultiHeadAttention, self).__init__()
 
-        assert embedding_size % num_heads == 0, "embedding_size must be divisible by num_heads"
-
         self.embedding_size = embedding_size
         self.num_heads = num_heads
         self.head_dim = embedding_size // num_heads
