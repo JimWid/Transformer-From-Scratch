@@ -394,7 +394,31 @@ class Transformer(nn.Module):
         return output
 ```
 # Sentiment Classification
-Once we have our Encoder, we can assign it to do Classification. We do not need the Decoder, since we are not doing anything sequence-to-sequence operation, simply attention.
+Once we have our Encoder, we can assign it to do Classification. We do not need the Decoder, since we are not doing anything sequence-to-sequence operation, simply attention. We create a custom dataset to simply transform the text into tokens and add padding (```<PAD>```) to short sentences to match ```max_len```.
+#### ClassificationDataset Class
+```python
+class ClassificationDataset(Dataset):
+    def __init__(self, texts, labels, tokenizer, seq_len):
+        self.texts = texts
+        self.labels = labels
+        self.tokenizer = tokenizer
+        self.seq_len = seq_len
+
+    def __len__(self):
+        return len(self.texts)
+    
+    def __getitem__(self, idx):
+            text = self.texts[idx]
+            label = self.labels[idx]
+
+            # Tokenize single example
+            tokens = self.tokenizer.transform(text)
+
+            # Pad / truncate
+            tokens = self.tokenizer.pad_sequence(tokens, max_len=self.seq_len)
+
+            return torch.tensor(tokens, dtype=torch.long), torch.tensor(label, dtype=torch.long)
+```
 #### Sentiment Classifier Code:
 ``` python
 class SentimentClassifier(nn.Module):
@@ -432,27 +456,35 @@ class SentimentClassifier(nn.Module):
 ```
 #### Training Details:
 - Optimizer: Adam
-- Learning rate: 2e-4
+- Learning rate: 3e-4
 - Loss Function: CrossEntropyLoss
-- Epochs: 20
+- Epochs: 100
 - Datasets: Amazon, IMDB, Yelp
 #### Model Specifications:
-- Total Parameters: 11.8 M
-- Model Size: ~45MB
+- Total Parameters: 1 M
+- Model Size: ~3.77MB
 #### Configuration:
 ```python
 model = SentimentClassifier(
-    vocab_size=vocab_size, (4562)
-    embedding_dim=512,
-    num_layers=3,
+    vocab_size=vocab_size, (5209)
+    embedding_dim=128,
+    num_layers=2,
     num_heads=4,
-    d_ff=2048,
-    max_len=MAX_LEN, (87)
+    d_ff=256,
+    max_len=100,
     num_classes=2,
-    dropout=0.3,
+    dropout=0.1,
     device=device).to(device)
 ```
 #### Final Metrics
+| Epoch | Train Loss | Train Accuracy | Validation Loss | Validation Accuracy |
+| ----- | ---------- | -------------- | --------------- | ------------------- |
+| 100   | 0.2728     | 88.33%         | 0.5007          | 79.00%              |
+
+<img width="633" height="469" alt="image" src="https://github.com/user-attachments/assets/575b4f08-b947-46d7-a02f-5271f9f8e39c" />
+
+<img width="560" height="455" alt="image" src="https://github.com/user-attachments/assets/cb29680e-a36a-4ddc-a221-1cd63a4c468f" />
+
 
 # Text Generation
 With the Decoder we can do Text Generation, and this is actually what most LLM models are, Decoder-only model. We need thought to create a custom dataset class, that will make the data sutiable for our model. 
@@ -507,11 +539,11 @@ class TextGenerator(nn.Module):
 - Optimizer: Adam
 - Learning rate: 3e-4
 - Loss Function: CrossEntropyLoss
-- Epochs: 120
+- Epochs: 400
 - Dataset: Personal Data
 #### Model Specifications:
-- Total Parameters: 2.76 M
-- Model Size: ~11MB
+- Total Parameters: 1.58 M
+- Model Size: ~6.3MB
 #### Configuration:
 ```python
 model = TextGenerator(
@@ -519,12 +551,17 @@ model = TextGenerator(
     embedding_dim=128,
     num_layers=3,
     num_heads=4,
-    d_ff=2048,
+    d_ff=512,
     max_len=128,
     dropout=0.1,
     device=device).to(device)
 ```
 #### Final Metrics
+| Epoch | Train Loss | Validation Loss | Perplexity |
+| ----- | ---------- | --------------- | ---------- |
+| 400   | 0.3832     | 2.5705          | 13.07      |
+
+<img width="1189" height="490" alt="image" src="https://github.com/user-attachments/assets/d3f23e56-56c6-48a0-ab7a-39c40afcac96" />
 
 # Translation
 
