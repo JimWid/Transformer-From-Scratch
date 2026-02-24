@@ -56,9 +56,12 @@ pip install -r requirements.txt
 ```
 # Tokenizer
 I am using a custom tokenizer from Scratch too, but you can use any.
-<img width="735" height="366" alt="image" src="https://github.com/user-attachments/assets/240cd9cb-42bc-4060-82c8-32243b6545b2" />
 
-A tokenizer is used to **build a vocabulary** from the dataset, **it maps the words to indices** (it sets a word to a number, **e.g. "the" -> 5**) and it adds special tokens such as:
+
+<img width="717" height="259" alt="image" src="https://github.com/user-attachments/assets/954a068c-6b76-4f23-a602-3001f508acb4" />
+
+
+A tokenizer is used to **build a vocabulary** from the dataset, **it maps the words to indices** (it sets a word to a number, **e.g. "the" → 5**) and it adds special tokens such as:
 - ```<PAD>``` # Padding for short sentences to match ```max_len```.
 - ```<UNK>``` # Used for Unknown words (words that are not inside vocabulary)
 - ```<SOS>``` # Used to declare when a setences begins
@@ -124,6 +127,8 @@ Basically concatenating all the outputs of all the attention-heads.
 
 #### Multi-Head Attention Code:
 
+<img width="524" height="304" alt="image" src="https://github.com/user-attachments/assets/3c14f24b-0674-4c1c-983b-c2b2babeb500" />
+
 ```python
 class MultiHeadAttention(nn.Module):
     def __init__(self, embedding_size, num_heads):
@@ -188,9 +193,13 @@ class MultiHeadAttention(nn.Module):
 
         return output
 ```
+### Masking
 
 ## Feed Foward Network
-Feed Foward Network is provides a non-linear and position-wise transformation, it increases model capacity and it mixes the information across features.
+
+<img width="83" height="178" alt="image" src="https://github.com/user-attachments/assets/8a74a7bc-e306-41f4-b256-626c4fb585b6" />
+
+Feed Foward Network provides a non-linear and position-wise transformation, it increases model capacity and it mixes the information across features.
 
 <img width="265" height="34" alt="image" src="https://github.com/user-attachments/assets/a5481947-401f-43d8-b7e3-8452a9a42956" />
 
@@ -218,6 +227,10 @@ We also have **Residual Connections (Add)**, an easy way to see it is that the R
 
 I use LayerNorm and Residual in both Encoder and Decoder:
 > Decoder and Encoder are basically wrappers of all these components.
+> 
+## Encoder:
+
+<img width="974" height="400" alt="image" src="https://github.com/user-attachments/assets/be42ef6e-f458-48a1-a6d4-8a9ed83fd316" />
 
 #### Encoder Code:
 ```python
@@ -289,8 +302,13 @@ class Encoder(nn.Module):
         
         return positional_encoding.unsqueeze(0)
 ```
-> Notice how we have an Encoder/Decoder **Block** and then an Encoder/Decoder, this way we can actually determine how many times we want to loop throughout our Encoder/Decoder. 
-#### Decoder Code:
+> Notice how we have an Encoder/Decoder **Block** and then an Encoder/Decoder, this way we can actually determine how many times we want to loop throughout our Encoder/Decoder.
+
+### Decoder:
+
+<img width="1003" height="367" alt="image" src="https://github.com/user-attachments/assets/10789092-632f-4f3b-8414-f47ec5e90085" />
+
+### Decoder Code:
 ```python
 class DecoderBlock(nn.Module):
     def __init__(self, embedding_size, num_heads, d_ff, dropout):
@@ -369,33 +387,9 @@ class Decoder(nn.Module):
 ```
 > ```enc_out``` is used for Translation model, and it means the encoded output from the Encoder. I skip it if there is no ```enc_out``` passed to the model. Therefore no **Cross Attention**.
 
-## Full Transformer Code:
-```python
-class Transformer(nn.Module):
-    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_dim, num_layers, d_ff, num_heads, max_len, dropout, device):
-        super(Transformer, self).__init__()
-
-        self.encoder = Encoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len,dropout, device)
-        self.decoder = Decoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, dropout, device)
-        self.src_pad_idx = src_pad_idx
-        self.trg_pad_idx = trg_pad_idx
-        self.device = device
-
-    def make_src_mask(self, src):
-        src_mask = (src != self.src_pad_idx).unsqueeze(1).unsqueeze(2)
-        return src_mask.to(self.device)
-    
-    def forward(self, src, trg):
-        src_mask = self.make_src_mask(src)
-
-        enc_out = self.encoder(src, src_mask)
-
-        output = self.decoder(trg, enc_out, src_mask)
-        return output
-```
 # Sentiment Classification
 Once we have our Encoder, we can assign it to do Classification. We do not need the Decoder, since we are not doing anything sequence-to-sequence operation, simply attention. We create a custom dataset to simply transform the text into tokens and add padding (```<PAD>```) to short sentences to match ```max_len```.
-#### ClassificationDataset Class
+### ClassificationDataset Class
 ```python
 class ClassificationDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, seq_len):
@@ -419,6 +413,10 @@ class ClassificationDataset(Dataset):
 
             return torch.tensor(tokens, dtype=torch.long), torch.tensor(label, dtype=torch.long)
 ```
+### Classification Model
+
+<img width="507" height="505" alt="image" src="https://github.com/user-attachments/assets/5f98e2e2-867d-460d-b9b4-6c132c603daa" />
+
 #### Sentiment Classifier Code:
 ``` python
 class SentimentClassifier(nn.Module):
@@ -510,6 +508,10 @@ class TextDataset(Dataset):
 ```
 > Here we are basically introducing ```stride```, which will determine how much we slide through tokens, in this case I am sliding/overlapping by half of the length of the sentence, this is good for better data usage!
 
+### Text Generation Model
+
+<img width="478" height="363" alt="image" src="https://github.com/user-attachments/assets/03ed2bfe-43dc-45c3-8244-319f6c215340" />
+
 #### Text Generator Code:
 ```python
 class TextGenerator(nn.Module):
@@ -564,7 +566,45 @@ model = TextGenerator(
 <img width="1189" height="490" alt="image" src="https://github.com/user-attachments/assets/d3f23e56-56c6-48a0-ab7a-39c40afcac96" />
 
 # Translation
+In case with translation, we use both encoder and decoder, aka the Full Transformer.
+### Transformer Cross-Attention
+### Translation Model
+<img width="496" height="663" alt="image" src="https://github.com/user-attachments/assets/cf27d430-3871-4c0a-aa1a-433468c88ec2" />
 
+#### Translation Model Code
+```python
+class Transformer(nn.Module):
+    def __init__(self, src_vocab_size, trg_vocab_size, src_pad_idx, trg_pad_idx, embedding_size, num_layers, d_ff, num_heads, max_len, dropout, device):
+        super(Transformer, self).__init__()
+
+        self.encoder = Encoder(src_vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len,dropout, device)
+        self.decoder = Decoder(trg_vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, dropout, device)
+        self.src_pad_idx = src_pad_idx
+        self.trg_pad_idx = trg_pad_idx
+        self.device = device
+
+    def make_src_mask(self, src):
+        src_mask = (src != self.src_pad_idx).unsqueeze(1).unsqueeze(2)
+        return src_mask
+
+    def make_trg_mask(self, trg):
+        N, trg_len = trg.shape
+
+        trg_pad_mask = (trg != self.trg_pad_idx).unsqueeze(1).unsqueeze(2)
+
+        trg_sub_mask = torch.tril(torch.ones(trg_len, trg_len)).to(self.device).bool()
+        trg_mask = trg_pad_mask & trg_sub_mask
+        return trg_mask
+    
+    def forward(self, src, trg):
+        src_mask = self.make_src_mask(src)
+        trg_mask = self.make_trg_mask(trg)
+        enc_out = self.encoder(src, src_mask)
+
+        output = self.decoder(trg, enc_out, src_mask, trg_mask)
+        return output
+
+```
 # License
 ```
 MIT License
