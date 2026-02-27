@@ -92,22 +92,14 @@ class Decoder(nn.Module):
 
         # Dropout
         self.dropout = nn.Dropout(dropout)
-
-        # Causal Mask
-        self.register_buffer("trg_mask", torch.tril(
-            torch.ones(max_len, max_len, device=self.device)
-            ).bool())
         
         # Final Linear Projection
         self.fc_out = nn.Linear(embedding_size, vocab_size)
 
-    def forward(self, x, enc_out=None, src_mask=None):
+    def forward(self, x, enc_out=None, src_mask=None, trg_mask=None):
 
         # x: [batch_size, target_seq_len]
         N, seq_len = x.shape
-        mask = self.trg_mask[:seq_len, :seq_len]
-        mask = mask.unsqueeze(0).unsqueeze(1)
-
         position = torch.arange(0, seq_len, device=self.device).unsqueeze(0).expand(N, seq_len)
 
         # x: [batch_size, target_seq_len, embedding_size]
@@ -115,8 +107,9 @@ class Decoder(nn.Module):
 
         # Pass through each DecoderBlock
         for layer in self.layers:
-            x = layer(x, enc_out, src_mask, mask)
+            x = layer(x, enc_out, src_mask, trg_mask)
 
-        # logits = self.fc_out(x)
+        if enc_out is not None:
+            x = self.fc_out(x)
 
         return x

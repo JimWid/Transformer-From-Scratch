@@ -41,30 +41,38 @@
         enc_src: [batch_size, src_seq_len, embedding_size]
         output: [batch_size, trg_seq_len, vocab_size]
 """
-
 import torch
 import torch.nn as nn
 from transformer.encoder import Encoder
 from transformer.decoder import Decoder
 
 class Transformer(nn.Module):
-    def __init__(self, vocab_size, src_pad_idx, trg_pad_idx, embedding_dim, num_layers, d_ff, num_heads, max_len, dropout, device):
+    def __init__(self, src_vocab_size, trg_vocab_size, src_pad_idx, trg_pad_idx, embedding_size, num_layers, d_ff, num_heads, max_len, dropout, device):
         super(Transformer, self).__init__()
 
-        self.encoder = Encoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len,dropout, device)
-        self.decoder = Decoder(vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, dropout, device)
+        self.encoder = Encoder(src_vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len,dropout, device)
+        self.decoder = Decoder(trg_vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, dropout, device)
         self.src_pad_idx = src_pad_idx
         self.trg_pad_idx = trg_pad_idx
         self.device = device
 
     def make_src_mask(self, src):
         src_mask = (src != self.src_pad_idx).unsqueeze(1).unsqueeze(2)
-        return src_mask.to(self.device)
+        return src_mask
+
+    def make_trg_mask(self, trg):
+        N, trg_len = trg.shape
+
+        trg_pad_mask = (trg != self.trg_pad_idx).unsqueeze(1).unsqueeze(2)
+
+        trg_sub_mask = torch.tril(torch.ones(trg_len, trg_len)).to(self.device).bool()
+        trg_mask = trg_pad_mask & trg_sub_mask
+        return trg_mask
     
     def forward(self, src, trg):
         src_mask = self.make_src_mask(src)
-
+        trg_mask = self.make_trg_mask(trg)
         enc_out = self.encoder(src, src_mask)
 
-        output = self.decoder(trg, enc_out, src_mask)
+        output = self.decoder(trg, enc_out, src_mask, trg_mask)
         return output

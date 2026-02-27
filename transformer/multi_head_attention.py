@@ -54,7 +54,7 @@ class MultiHeadAttention(nn.Module):
 
         # Optional mask
         if mask is not None:
-            scores = scores.masked_fill(mask == 0, float("-inf"))
+            scores = scores.masked_fill(~mask, -1e9)
 
         # Softmax
         attn_weights = F.softmax(scores, dim=-1)
@@ -81,6 +81,9 @@ class MultiHeadAttention(nn.Module):
         V = V.view(N, value_len, self.num_heads, self.head_dim).transpose(1, 2)
 
         # Using the scaled dot product attention
+        if mask is not None:
+            mask = mask.expand(N, self.num_heads, mask.size(-2), mask.size(-1))
+
         attn_output = self.scaled_dot_product_attention(Q, K, V, mask)
         attn_output = attn_output.transpose(1, 2).contiguous().view(N, -1, self.embedding_size)
 
