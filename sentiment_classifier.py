@@ -2,12 +2,12 @@ from transformer.encoder import Encoder
 import torch.nn as nn
 
 class SentimentClassifier(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, num_layers, num_heads, d_ff, max_len, num_classes, dropout, device):
+    def __init__(self, vocab_size, embedding_size, num_layers, num_heads, d_ff, max_len, num_classes, dropout, device):
         super().__init__()
         
         self.encoder = Encoder(
             vocab_size=vocab_size,
-            embedding_size=embedding_dim,
+            embedding_size=embedding_size,
             num_layers=num_layers,
             num_heads=num_heads,
             d_ff=d_ff,
@@ -17,10 +17,10 @@ class SentimentClassifier(nn.Module):
         )
 
         self.classifier = nn.Sequential(
-            nn.Linear(embedding_dim, embedding_dim),
+            nn.Linear(embedding_size, embedding_size),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(embedding_dim, num_classes)
+            nn.Linear(embedding_size, num_classes)
         )
 
     def forward(self, x, src_mask=None):
@@ -29,7 +29,7 @@ class SentimentClassifier(nn.Module):
 
         # Mean pooling of the sequence_length (dim=1)
         x = x.mean(dim=1)
-        #x = nn.AdaptiveAvgPool1d(1)
 
+        #x = nn.AdaptiveAvgPool1d(1)
         logits = self.classifier(x)
         return logits

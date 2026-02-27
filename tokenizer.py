@@ -37,9 +37,6 @@ class Tokenizer:
             tokens = text
         return [self.word_to_idx.get(t, self.word_to_idx["<UNK>"]) for t in tokens]
 
-    def transform_batch(self, texts): # Use this for batch of texts
-        return [self.transform(t) for t in texts]
-
     def pad_sequence(self, sequence, max_len):
             if len(sequence) < max_len:
                 # Pad with 0s (the index of <PAD>)
